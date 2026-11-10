@@ -2,28 +2,27 @@
 
 ## Purpose
 
-`trysac-latency-budget` is a small, dependency-free Python library: Per-stage latency budgets for request pipelines: nearest-rank percentiles per window, unbudgeted time, and alerts with trigger and clear hysteresis
+`trysac-latency-budget` is a dependency-free Python library for per-stage latency budgets, nearest-rank percentiles per observation window, unbudgeted time, and alerts with trigger and clear hysteresis.
 
 ## Shape
 
 ```text
-caller code --> latency_budget (public API in __init__.py)
+caller code --> latency_budget (public API in src/latency_budget/__init__.py)
                     |
-                    +-- pure functions, no I/O, no global state
+                    +-- percentile and LatencyBudget validation (pure)
+                    +-- BudgetTracker (stateful, in-memory, no I/O)
 ```
 
-- **Public API**: the names listed in `__all__` of `src/latency_budget/__init__.py`. Anything else is
-  internal and may change without a major version.
-- **Errors**: invalid input raises built-in exceptions (`ValueError`, `TypeError`) with a clear
-  message; the library never prints or exits.
-- **Side effects**: none. If a feature needs I/O, isolate it in its own module behind a small
-  interface and record the choice in an ADR.
+- Public names are `Alert`, `BudgetTracker`, `LatencyBudget`, `LatencyBudgetError`, `WindowReport`, and `percentile`, as listed in `__all__`.
+- `LatencyBudget` is a frozen dataclass with a mapping proxy for `stages`; it validates total and stage budgets, stage names, stage count, and the stage sum.
+- `BudgetTracker` keeps per-window observation lists for each configured stage, `unbudgeted`, and `total`. It caps each window at `max_window_observations` and counts dropped observations.
+- `close_window` computes nearest-rank percentiles for non-empty windows, compares each series to its budget, updates per-series trigger and clear counters, and returns a `WindowReport`.
+- Errors are raised as `LatencyBudgetError` with a stable `.code`; the module also installs a `NullHandler` on its logger and performs no other logging or I/O.
 
 ## Quality contract
 
-`scripts/check.py` is the single definition of the gates; `fabrica.json` tells the factory and CI
-how to run it. See [TESTING.md](TESTING.md).
+The supplied test module is `tests/test_latency_budget.py`; it imports the public package and uses `pytest.raises`. See [TESTING.md](TESTING.md).
 
 ## Decisions
 
-Architecture decisions are recorded in [decisions/](decisions/) as numbered ADRs.
+No architecture decision records are included in the supplied tree. The implementation decisions are visible in `src/latency_budget/__init__.py`.
