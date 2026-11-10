@@ -1,0 +1,16 @@
+# latency-budget
+
+> Per-stage latency budgets for request pipelines: nearest-rank percentiles per window, unbudgeted time, and alerts with trigger and clear hysteresis Python package `trysac-latency-budget`, import name `latency_budget`, MIT licensed,
+> Python >= 3.10, no runtime dependencies.
+
+## Docs
+
+- [README](README.md): problem, install, usage example
+- [AGENTS](AGENTS.md): commands, folder map, conventions, limits
+- [Architecture](docs/ARCHITECTURE.md): shape of the package and its public API
+- [Testing](docs/TESTING.md): how to run and extend the tests
+
+## Optional
+
+- [Stack](docs/STACK.md): tools used and discarded
+- [Changelog](CHANGELOG.md): release history
