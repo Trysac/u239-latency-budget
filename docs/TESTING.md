@@ -3,27 +3,19 @@
 ## Running
 
 ```sh
-uv run pytest --cov=latency_budget   # tests with coverage report
-uv run python scripts/check.py      # every gate, as CI and the factory run it
+python -m pytest tests/test_latency_budget.py
 ```
 
 ## Policy
 
-- Branch coverage of `src/latency_budget` must stay at or above 80 %; the gate fails below it.
-- Tests exercise the public API (`import latency_budget`) and assert every observable effect:
-  return values, raised exceptions and their messages.
-- Each bug fix starts with a failing test that reproduces it.
-- Tests are deterministic: no network, no wall clock, no dependence on test order.
+- The supplied test module asserts return values and `LatencyBudgetError.code` values through the public import `latency_budget`.
+- Tests are deterministic and do not use network, wall-clock scheduling, or external services.
+- The supplied module contains tests for percentile calculation and `LatencyBudget` validation and construction.
 
 ## Tiers
 
-- Local tier (every gate run, coverage measured here): unit and property tests, plus conformance on small
-  fixtures kept in the repository.
-- CI tier: conformance that needs an external tool or a download. Mark them `@pytest.mark.conformance`; `scripts/check.py` deselects them locally
-  (unless `FABRICA_CI=1`). The CI `conformance` job sets `FABRICA_CI=1` and runs the full suite. Tools are installed
-  by the optional `ci/conformance-setup.sh` (bash, CI only; verify every download against a pinned SHA-256), and
-  tagged tests skip cleanly when their tool is missing.
+- Local pytest tier: `tests/test_latency_budget.py`. No conformance markers, external tools, or CI-only setup are present in the supplied test module.
 
 ## Layout
 
-`tests/test_<module>.py` mirrors each public module. Shared fixtures go in `tests/conftest.py`.
+- `tests/test_latency_budget.py` contains `test_percentile_acceptance_nearest_rank`, `test_percentile_single_value`, `test_percentile_empty_raises`, `test_percentile_invalid_p_raises`, `test_percentile_rank_rounding`, `test_latency_budget_valid`, `test_latency_budget_stages_immutable`, `test_latency_budget_total_ms_not_positive`, `test_latency_budget_stages_sum_exceeds_total`, `test_latency_budget_stage_negative_budget`, `test_latency_budget_stage_infinite_budget`, `test_latency_budget_invalid_stage_name`, `test_latency_budget_too_many_stages`, `test_latency_budget_from_dict_valid`, `test_latency_budget_from_dict_unknown_key`, `test_latency_budget_from_dict_missing_keys`, and `test_latency_budget_from_dict_invalid_types`.
